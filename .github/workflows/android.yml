@@ -23,18 +23,23 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Web Assets
+      # Install Android platform package and add it
+      - name: Add Android Platform
+        run: |
+          npm install @capacitor/android
+          npx cap add android
+
+      # Sync web assets to the android folder
+      - name: Sync Android
         run: |
           mkdir -p dist
-          # Build your web app
-          npm run build || echo "No build script found"
-          # Sync Capacitor
-          npx cap add android || echo "Android platform already exists"
           npx cap sync android
 
+      # Build the debug APK
       - name: Build Debug APK
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload APK
