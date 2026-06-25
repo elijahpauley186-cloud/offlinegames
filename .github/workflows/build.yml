@@ -1,4 +1,4 @@
-name: Build iOS IPA
+name: Build Unsigned IPA
 
 on:
   workflow_dispatch:
@@ -32,16 +32,25 @@ jobs:
       - name: Sync
         run: npx cap sync ios
 
-      - name: Build Archive
+      - name: Build Unsigned Archive
         run: |
           cd ios/App
-          # This command builds your app into an xcarchive folder
+          # Perform the archive without code signing
           xcodebuild -workspace App.xcworkspace -scheme App -destination generic/platform=iOS \
             -archivePath build/App.xcarchive archive \
-            CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-      - name: Upload Archive
+      - name: Create Unsigned IPA
+        run: |
+          # The IPA structure requires a 'Payload' folder
+          mkdir -p Payload
+          # Copy the built app from the archive into the Payload folder
+          cp -r ios/App/build/App.xcarchive/Products/Applications/*.app Payload/
+          # Zip the Payload folder
+          zip -r Offline-Games.ipa Payload/
+
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: Offline-Games-Archive
-          path: ios/App/build/App.xcarchive
+          name: Offline-Games-IPA
+          path: Offline-Games.ipa
