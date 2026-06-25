@@ -18,12 +18,9 @@ jobs:
       - name: Install
         run: npm install
 
-      # 1. We tell Capacitor to use a folder named 'dist'
       - name: Capacitor Init
         run: npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir dist
 
-      # 2. Automated lazy step: Create 'dist' and move your files there 
-      # while ignoring the system folders that cause errors.
       - name: Prepare Web Assets
         run: |
           mkdir -p dist
@@ -35,19 +32,16 @@ jobs:
       - name: Sync
         run: npx cap sync ios
 
-      - name: Build IPA
+      - name: Build Archive
         run: |
           cd ios/App
+          # This command builds your app into an xcarchive folder
           xcodebuild -workspace App.xcworkspace -scheme App -destination generic/platform=iOS \
             -archivePath build/App.xcarchive archive \
             CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-          xcodebuild -exportArchive -archivePath build/App.xcarchive \
-            -exportOptionsPlist ../../exportOptions.plist \
-            -exportPath build/output
-
-      - name: Upload IPA
+      - name: Upload Archive
         uses: actions/upload-artifact@v4
         with:
-          name: Offline-Games-IPA
-          path: ios/App/build/output/*.ipa
+          name: Offline-Games-Archive
+          path: ios/App/build/App.xcarchive
