@@ -14,24 +14,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install
+      - name: Install Dependencies
         run: npm install
 
-      - name: Init and Build
+      - name: Build App
         run: |
           npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir dist
           mkdir -p dist
           rsync -av --exclude='ios' --exclude='.github' --exclude='.git' --exclude='node_modules' . dist/
           npx cap add ios
           npx cap sync ios
-
-      # Generate icons specifically
-      - name: Setup Icons
-        run: |
+          # Generate icons
           npm install @capacitor/assets --save-dev
           npx @capacitor/assets generate --ios
 
-      # Build the app structure
       - name: Build Archive
         run: |
           cd ios/App
@@ -39,13 +35,18 @@ jobs:
             -archivePath build/App.xcarchive archive \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-      # Create a simple, clean IPA folder structure
       - name: Package IPA
         run: |
+          # Create a clean folder structure
           mkdir -p Payload
+          # This line is the most important: it finds the actual app bundle
           cp -r ios/App/build/App.xcarchive/Products/Applications/*.app Payload/
-          # Create a flat, clean zip file
-          zip -r -9 Offline-Games-Final.ipa Payload/
+          
+          # Verify the app was actually copied
+          ls -la Payload/
+          
+          # Zip the payload folder
+          zip -r Offline-Games-Final.ipa Payload/
 
       - name: Upload
         uses: actions/upload-artifact@v4
