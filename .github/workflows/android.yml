@@ -20,23 +20,29 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Install with legacy-peer-deps to avoid the main dependency tree conflict
       - name: Install Dependencies
         run: npm install --legacy-peer-deps
 
-      # Install Android platform package pinned to your core version and add it
+      - name: Prepare Web Assets
+        run: |
+          # 1. Create a clean dist folder
+          rm -rf dist
+          mkdir -p dist
+          # 2. Copy all your game files into dist 
+          # (This assumes your main files are in the root directory)
+          cp -r *.html *.js *.css assets/ 2>/dev/null || echo "Some files missing"
+          # 3. Double check that index.html exists in dist
+          ls -la dist/index.html
+
       - name: Add Android Platform
         run: |
           npm install @capacitor/android@6.2.1 --legacy-peer-deps
           npx cap add android
 
-      # Sync web assets to the android folder
       - name: Sync Android
         run: |
-          mkdir -p dist
           npx cap sync android
 
-      # Build the debug APK
       - name: Build Debug APK
         run: |
           cd android
