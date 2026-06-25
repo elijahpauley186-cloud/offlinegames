@@ -17,19 +17,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Generate iOS Icons from icon.png
-        run: npx @capacitor/assets generate --ios
+      - name: Initialize Capacitor
+        run: npx cap init --web-dir . --app-id com.dumbgames.offlinegames --app-name "Offline Games"
 
-      - name: Initialize Capacitor iOS
-        run: |
-          npx cap init --app-id com.dumbgames.offlinegames --app-name "Offline Games" || true
-          npx cap add ios || true
+      - name: Add iOS Platform
+        run: npx cap add ios
 
-      - name: Sync Project
+      - name: Generate Icons
+        run: npx @capacitor/assets generate --ios --assetPath . || echo "Icon generation skipped"
+
+      - name: Sync iOS
         run: npx cap sync ios
 
       - name: Build IPA
