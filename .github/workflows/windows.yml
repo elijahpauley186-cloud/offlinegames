@@ -1,0 +1,33 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build EXE
+        run: |
+          # 1. Install nativefier globally
+          npm install -g nativefier
+          
+          # 2. Build the exe from your current folder (.)
+          # --name sets the filename, --single-instance ensures only one window opens
+          nativefier --name "My2048Game" . ./build --single-instance --internal-urls ".*"
+          
+          # 3. Rename the output folder to something easy to find
+          dir
+          
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: My2048Game-Windows
+          path: build/My2048Game-win32-x64/My2048Game.exe
