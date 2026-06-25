@@ -19,21 +19,20 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install --package-lock-only   # This creates the lock file
+        run: |
+          npm install --package-lock-only
+          npm install
 
-      - name: Install Capacitor dependencies
-        run: npm install
-
-      - name: Initialize Capacitor
-        run: npx cap init --web-dir . --app-id com.dumbgames.offlinegames --app-name "Offline Games"
+      - name: Initialize Capacitor (Fixed)
+        run: npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir .
 
       - name: Add iOS Platform
         run: npx cap add ios
 
       - name: Generate Icons
-        run: npx @capacitor/assets generate --ios || echo "Icon step skipped"
+        run: npx @capacitor/assets generate --ios || echo "Icon generation skipped"
 
-      - name: Sync iOS
+      - name: Sync Project
         run: npx cap sync ios
 
       - name: Build IPA
