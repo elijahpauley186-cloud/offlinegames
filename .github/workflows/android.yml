@@ -13,29 +13,28 @@ jobs:
       - uses: actions/setup-java@v4
         with: {java-version: '17', distribution: 'temurin'}
 
-      - name: Create dist folder
+      - name: Build Web Assets
         run: |
           mkdir -p dist
-          # Copy your game files into the dist folder
-          cp index.html dist/
-          cp -r assets/ dist/ 2>/dev/null || echo "No assets"
-          cp *.js dist/ 2>/dev/null || echo "No JS"
-          cp *.css dist/ 2>/dev/null || echo "No CSS"
+          # This ensures your game files are in the right place for Capacitor
+          cp -r . dist/ || echo "No files to copy"
 
-      - name: Build and Sync
+      - name: Build Android
         run: |
-          npm install --legacy-peer-deps
-          npm install @capacitor/android@6.2.1
+          npm install @capacitor/core @capacitor/android@6.2.1
           npx cap add android || echo "Platform exists"
           npx cap sync android
-
-      - name: Build APK
-        run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Locate and Upload APK
+        run: |
+          # This command finds the actual file path
+          find . -name "*.apk" > apk_path.txt
+          cat apk_path.txt
+        
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: OfflineGames-APK
