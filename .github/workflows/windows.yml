@@ -19,15 +19,18 @@ jobs:
           # 1. Install nativefier globally
           npm install -g nativefier
           
-          # 2. Build the exe from your current folder (.)
-          # --name sets the filename, --single-instance ensures only one window opens
-          nativefier --name "My2048Game" . ./build --single-instance --internal-urls ".*"
-          
-          # 3. Rename the output folder to something easy to find
-          dir
+          # 2. Build the exe using your brand name and ID
+          # We use the app-id to match your identifier
+          nativefier --name "Offline Games" \
+          --app-name "Offline Games" \
+          --app-version "1.0.0" \
+          --app-id "com.dumbgames.offlinegames" \
+          --single-instance \
+          --internal-urls ".*" \
+          . ./build
           
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: My2048Game-Windows
-          path: build/My2048Game-win32-x64/My2048Game.exe
+          name: OfflineGames-Windows
+          path: build/Offline\ Games-win32-x64/Offline\ Games.exe
