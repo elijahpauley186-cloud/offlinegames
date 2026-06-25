@@ -1,0 +1,6 @@
+{
+  "appId": "com.dumbgames.offlinegames",
+  "appName": "Offline Games",
+  "webDir": ".",
+  "bundledWebRuntime": true
+}
