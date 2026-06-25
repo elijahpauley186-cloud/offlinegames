@@ -23,16 +23,19 @@ jobs:
           npm install --package-lock-only
           npm install
 
-      - name: Initialize Capacitor (Fixed)
-        run: npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir .
+      - name: Initialize Capacitor
+        run: npx cap init "Offline Games" com.dumbgames.offlinegames
 
       - name: Add iOS Platform
         run: npx cap add ios
 
-      - name: Generate Icons
-        run: npx @capacitor/assets generate --ios || echo "Icon generation skipped"
+      - name: Copy web files
+        run: cp -r . ios/App/App/public/ || true
 
-      - name: Sync Project
+      - name: Generate Icons
+        run: npx @capacitor/assets generate --ios || echo "Icon step skipped"
+
+      - name: Sync iOS
         run: npx cap sync ios
 
       - name: Build IPA
