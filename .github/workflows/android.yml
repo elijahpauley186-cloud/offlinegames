@@ -25,18 +25,11 @@ jobs:
 
       - name: Prepare Web Assets
         run: |
-          # Create the directory structure
           mkdir -p dist
-          
-          # Explicitly copy files from the root to the dist folder
-          # This ensures index.html is definitely present
           cp index.html dist/index.html
-          cp -r assets/ dist/ 2>/dev/null || echo "No assets folder found"
-          cp *.js dist/ 2>/dev/null || echo "No JS files found"
-          cp *.css dist/ 2>/dev/null || echo "No CSS files found"
-          
-          # Verify the file is actually there
-          ls -la dist/index.html
+          cp -r assets/ dist/ 2>/dev/null || echo "No assets"
+          cp *.js dist/ 2>/dev/null || echo "No JS"
+          cp *.css dist/ 2>/dev/null || echo "No CSS"
 
       - name: Add Android Platform
         run: |
@@ -47,14 +40,17 @@ jobs:
         run: |
           npx cap sync android
 
-      - name: Build Debug APK
+      - name: Build Release APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          # This builds the release version
+          ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: OfflineGames-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: OfflineGames-Release-APK
+          # The release APK is usually found here
+          path: android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
