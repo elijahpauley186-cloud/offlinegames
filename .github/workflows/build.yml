@@ -17,9 +17,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install dependencies
+        run: npm install --package-lock-only   # This creates the lock file
+
+      - name: Install Capacitor dependencies
         run: npm install
 
       - name: Initialize Capacitor
@@ -29,7 +31,7 @@ jobs:
         run: npx cap add ios
 
       - name: Generate Icons
-        run: npx @capacitor/assets generate --ios --assetPath . || echo "Icon generation skipped"
+        run: npx @capacitor/assets generate --ios || echo "Icon step skipped"
 
       - name: Sync iOS
         run: npx cap sync ios
