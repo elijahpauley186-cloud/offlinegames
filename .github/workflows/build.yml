@@ -1,4 +1,4 @@
-name: Build Unsigned IPA
+name: Build IPA
 
 on:
   workflow_dispatch:
@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -15,46 +14,41 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Dependencies
+      - name: Install
         run: npm install
 
-      - name: Capacitor Init
-        run: npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir dist
-
-      - name: Prepare Web Assets
+      - name: Init and Build
         run: |
+          npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir dist
           mkdir -p dist
           rsync -av --exclude='ios' --exclude='.github' --exclude='.git' --exclude='node_modules' . dist/
-
-      - name: Add and Sync iOS
-        run: |
           npx cap add ios
           npx cap sync ios
 
-      # Generate icons AFTER sync so they replace the default Capacitor icons
-      - name: Install Assets Tool
-        run: npm install @capacitor/assets --save-dev
+      # Generate icons specifically
+      - name: Setup Icons
+        run: |
+          npm install @capacitor/assets --save-dev
+          npx @capacitor/assets generate --ios
 
-      - name: Generate Icons
-        run: npx @capacitor/assets generate --ios
-
-      - name: Build Unsigned Archive
+      # Build the app structure
+      - name: Build Archive
         run: |
           cd ios/App
           xcodebuild -workspace App.xcworkspace -scheme App -destination generic/platform=iOS \
             -archivePath build/App.xcarchive archive \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-      - name: Create Unsigned IPA
+      # Create a simple, clean IPA folder structure
+      - name: Package IPA
         run: |
           mkdir -p Payload
-          # Copy the .app folder from the archive to the Payload directory
           cp -r ios/App/build/App.xcarchive/Products/Applications/*.app Payload/
-          # Create the final IPA zip
-          zip -r Offline-Games.ipa Payload/
+          # Create a flat, clean zip file
+          zip -r -9 Offline-Games-Final.ipa Payload/
 
-      - name: Upload IPA
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: Offline-Games-IPA
-          path: Offline-Games.ipa
+          name: Offline-Games-Final
+          path: Offline-Games-Final.ipa
