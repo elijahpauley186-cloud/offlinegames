@@ -18,6 +18,13 @@ jobs:
       - name: Install
         run: npm install
 
+      # Install the asset tool and generate your icons
+      - name: Install Assets Tool
+        run: npm install @capacitor/assets --save-dev
+
+      - name: Generate Icons
+        run: npx @capacitor/assets generate --ios
+
       - name: Capacitor Init
         run: npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir dist
 
@@ -35,18 +42,14 @@ jobs:
       - name: Build Unsigned Archive
         run: |
           cd ios/App
-          # Perform the archive without code signing
           xcodebuild -workspace App.xcworkspace -scheme App -destination generic/platform=iOS \
             -archivePath build/App.xcarchive archive \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
       - name: Create Unsigned IPA
         run: |
-          # The IPA structure requires a 'Payload' folder
           mkdir -p Payload
-          # Copy the built app from the archive into the Payload folder
           cp -r ios/App/build/App.xcarchive/Products/Applications/*.app Payload/
-          # Zip the Payload folder
           zip -r Offline-Games.ipa Payload/
 
       - name: Upload IPA
