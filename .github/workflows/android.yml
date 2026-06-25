@@ -25,13 +25,17 @@ jobs:
 
       - name: Prepare Web Assets
         run: |
-          # 1. Create a clean dist folder
-          rm -rf dist
+          # Create the directory structure
           mkdir -p dist
-          # 2. Copy all your game files into dist 
-          # (This assumes your main files are in the root directory)
-          cp -r *.html *.js *.css assets/ 2>/dev/null || echo "Some files missing"
-          # 3. Double check that index.html exists in dist
+          
+          # Explicitly copy files from the root to the dist folder
+          # This ensures index.html is definitely present
+          cp index.html dist/index.html
+          cp -r assets/ dist/ 2>/dev/null || echo "No assets folder found"
+          cp *.js dist/ 2>/dev/null || echo "No JS files found"
+          cp *.css dist/ 2>/dev/null || echo "No CSS files found"
+          
+          # Verify the file is actually there
           ls -la dist/index.html
 
       - name: Add Android Platform
