@@ -18,16 +18,19 @@ jobs:
       - name: Install
         run: npm install
 
+      # 1. We tell Capacitor to use a folder named 'dist'
       - name: Capacitor Init
-        run: npx cap init "Offline Games" com.dumbgames.offlinegames
+        run: npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir dist
+
+      # 2. Automated lazy step: Create 'dist' and move your files there 
+      # while ignoring the system folders that cause errors.
+      - name: Prepare Web Assets
+        run: |
+          mkdir -p dist
+          rsync -av --exclude='ios' --exclude='.github' --exclude='.git' --exclude='node_modules' . dist/
 
       - name: Add iOS
         run: npx cap add ios
-
-      - name: Copy Files
-        run: |
-          mkdir -p ios/App/App/public
-          cp -R . ios/App/App/public/ 2>/dev/null || true
 
       - name: Sync
         run: npx cap sync ios
