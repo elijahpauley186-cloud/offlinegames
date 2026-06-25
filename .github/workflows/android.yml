@@ -20,13 +20,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # Install with legacy-peer-deps to avoid the main dependency tree conflict
       - name: Install Dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
-      # Install Android platform package and add it
+      # Install Android platform package pinned to your core version and add it
       - name: Add Android Platform
         run: |
-          npm install @capacitor/android
+          npm install @capacitor/android@6.2.1 --legacy-peer-deps
           npx cap add android
 
       # Sync web assets to the android folder
