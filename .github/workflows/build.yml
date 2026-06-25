@@ -1,0 +1,53 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate iOS Icons from icon.png
+        run: npx @capacitor/assets generate --ios
+
+      - name: Initialize Capacitor iOS
+        run: |
+          npx cap init --app-id com.dumbgames.offlinegames --app-name "Offline Games" || true
+          npx cap add ios || true
+
+      - name: Sync Project
+        run: npx cap sync ios
+
+      - name: Build IPA
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -destination generic/platform=iOS \
+            -archivePath build/App.xcarchive \
+            archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist ../../exportOptions.plist \
+            -exportPath build/output
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Offline-Games-IPA
+          path: ios/App/build/output/*.ipa
