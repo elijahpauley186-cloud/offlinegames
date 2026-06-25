@@ -24,7 +24,6 @@ jobs:
           rsync -av --exclude='ios' --exclude='.github' --exclude='.git' --exclude='node_modules' . dist/
           npx cap add ios
           npx cap sync ios
-          # Generate icons
           npm install @capacitor/assets --save-dev
           npx @capacitor/assets generate --ios
 
@@ -37,19 +36,13 @@ jobs:
 
       - name: Package IPA
         run: |
-          # Create a clean folder structure
           mkdir -p Payload
-          # This line is the most important: it finds the actual app bundle
           cp -r ios/App/build/App.xcarchive/Products/Applications/*.app Payload/
-          
-          # Verify the app was actually copied
-          ls -la Payload/
-          
-          # Zip the payload folder
-          zip -r Offline-Games-Final.ipa Payload/
+          # Zip into a file specifically named with the .ipa extension
+          zip -r OfflineGames.ipa Payload/
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: Offline-Games-Final
-          path: Offline-Games-Final.ipa
+          name: OfflineGames
+          path: OfflineGames.ipa
