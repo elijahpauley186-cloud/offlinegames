@@ -1,5 +1,5 @@
 {
-  "appId": "com.dumbgames.offlinegames",
+  "appId": "com.dumbgames.offlinegameshub",
   "appName": "Offline Games",
   "webDir": "dist",
   "bundledWebRuntime": false
