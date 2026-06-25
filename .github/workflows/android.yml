@@ -13,12 +13,19 @@ jobs:
       - uses: actions/setup-java@v4
         with: {java-version: '17', distribution: 'temurin'}
 
+      - name: Create dist folder
+        run: |
+          mkdir -p dist
+          # Copy your game files into the dist folder
+          cp index.html dist/
+          cp -r assets/ dist/ 2>/dev/null || echo "No assets"
+          cp *.js dist/ 2>/dev/null || echo "No JS"
+          cp *.css dist/ 2>/dev/null || echo "No CSS"
+
       - name: Build and Sync
         run: |
           npm install --legacy-peer-deps
-          # Ensure Capacitor is installed
           npm install @capacitor/android@6.2.1
-          # Add platform and sync
           npx cap add android || echo "Platform exists"
           npx cap sync android
 
@@ -27,8 +34,6 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-          # Debugging: List files so we know where the APK went
-          find . -name "*.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
