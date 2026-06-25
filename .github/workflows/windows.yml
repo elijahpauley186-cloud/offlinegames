@@ -16,8 +16,17 @@ jobs:
 
       - name: Build EXE
         run: |
+          # Install nativefier
           npm install -g nativefier
-          nativefier --name "Offline Games" --app-name "Offline Games" --app-version "1.0.0" --app-id "com.dumbgames.offlinegames" --single-instance --internal-urls ".*" . ./build
+          
+          # Build the exe with branding and your icon from the assets folder
+          # Make sure 'icon.png' matches the actual name of your file in assets/
+          nativefier --name "Offline Games" \
+          --app-id "com.dumbgames.offlinegames" \
+          --icon "assets/icon.png" \
+          --single-instance \
+          --internal-urls ".*" \
+          . ./build
           
       - name: Upload EXE
         uses: actions/upload-artifact@v4
