@@ -15,30 +15,34 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install
+      - name: Install Dependencies
         run: npm install
 
-      # Install the asset tool and generate your icons
+      # 1. Init Capacitor
+      - name: Capacitor Init
+        run: npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir dist
+
+      # 2. Prepare Web Assets
+      - name: Prepare Web Assets
+        run: |
+          mkdir -p dist
+          rsync -av --exclude='ios' --exclude='.github' --exclude='.git' --exclude='node_modules' . dist/
+
+      # 3. Add and Sync to create the iOS project
+      - name: Add iOS
+        run: npx cap add ios
+
+      - name: Sync iOS
+        run: npx cap sync ios
+
+      # 4. Generate Icons (Runs AFTER sync to ensure they stick)
       - name: Install Assets Tool
         run: npm install @capacitor/assets --save-dev
 
       - name: Generate Icons
         run: npx @capacitor/assets generate --ios
 
-      - name: Capacitor Init
-        run: npx cap init "Offline Games" com.dumbgames.offlinegames --web-dir dist
-
-      - name: Prepare Web Assets
-        run: |
-          mkdir -p dist
-          rsync -av --exclude='ios' --exclude='.github' --exclude='.git' --exclude='node_modules' . dist/
-
-      - name: Add iOS
-        run: npx cap add ios
-
-      - name: Sync
-        run: npx cap sync ios
-
+      # 5. Build Archive
       - name: Build Unsigned Archive
         run: |
           cd ios/App
@@ -46,6 +50,7 @@ jobs:
             -archivePath build/App.xcarchive archive \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
+      # 6. Create IPA
       - name: Create Unsigned IPA
         run: |
           mkdir -p Payload
