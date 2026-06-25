@@ -1,8 +1,6 @@
 name: Build iOS IPA
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -10,45 +8,38 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: |
-          npm install --package-lock-only
-          npm install
+      - name: Install
+        run: npm install
 
-      - name: Initialize Capacitor
+      - name: Capacitor Init
         run: npx cap init "Offline Games" com.dumbgames.offlinegames
 
-      - name: Add iOS Platform
+      - name: Add iOS
         run: npx cap add ios
 
-      - name: Copy web files
-        run: cp -r . ios/App/App/public/ || true
+      - name: Copy Files
+        run: |
+          mkdir -p ios/App/App/public
+          cp -R . ios/App/App/public/ 2>/dev/null || true
 
-      - name: Generate Icons
-        run: npx @capacitor/assets generate --ios || echo "Icon step skipped"
-
-      - name: Sync iOS
+      - name: Sync
         run: npx cap sync ios
 
       - name: Build IPA
         run: |
           cd ios/App
-          xcodebuild -workspace App.xcworkspace \
-            -scheme App \
-            -destination generic/platform=iOS \
-            -archivePath build/App.xcarchive \
-            archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          xcodebuild -workspace App.xcworkspace -scheme App -destination generic/platform=iOS \
+            -archivePath build/App.xcarchive archive \
+            CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-          xcodebuild -exportArchive \
-            -archivePath build/App.xcarchive \
+          xcodebuild -exportArchive -archivePath build/App.xcarchive \
             -exportOptionsPlist ../../exportOptions.plist \
             -exportPath build/output
 
