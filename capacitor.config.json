@@ -1,6 +1,8 @@
 {
-  "appId": "com.dumbgames.offlinegameshub",
+  "appId": "com.dumbgames.offlinegames",
   "appName": "Offline Games",
   "webDir": "dist",
-  "bundledWebRuntime": false
+  "ios": {
+    "iconPath": "assets/icon.png"
+  }
 }
